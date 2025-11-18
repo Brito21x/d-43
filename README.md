@@ -5,7 +5,7 @@
 
 Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
-## grupo  *99*
+## grupo  *43*
 | #      | Número  | Nome |
 | -----  | -----   | ------------------- |
 | _A1_   | 29330     | Edgar Brito       |
