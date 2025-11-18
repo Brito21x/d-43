@@ -26,6 +26,6 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
 ... completar 
 
-## Link
+## Referências WEB
 
-Link do Projeto[https://ipca.pt]
+[Referências][https://ipca.pt]
