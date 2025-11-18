@@ -1,4 +1,4 @@
-## Trabalho Prático
+# Trabalho Prático
 
 ## **Laboratórios de Informática**
 
