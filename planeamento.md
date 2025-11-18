@@ -1,6 +1,6 @@
-#Trabalho Prático
+## Trabalho Prático
 
-**Laboratórios de Informática**
+## **Laboratórios de Informática**
 
 Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
