@@ -7,11 +7,11 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
 ## grupo  *99*
 | #      | Número  | Nome |
-| -----  | -----   | ---- |
-| _A1_   | ...     | ...  |
-| _A2_   | ...     | ...  |
-| _A3_   | ...     | ...  |
-| _A4_   | ...     | ...  |
+| -----  | -----   | ------------------- |
+| _A1_   | 29330     | Edgar Brito       |
+| _A2_   | 29328     | Tiago Lima        |
+| _A3_   | 29333     | Rui Araújo        |
+| _A4_   | 29325     | Henrique Ribeiro  |
 
 ## organização 
 
