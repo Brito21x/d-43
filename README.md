@@ -28,4 +28,4 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
 ## Referências WEB
 
-[Referências](https://ipca.pt)
+[Configuração Inicial Gitignore](https://www.toptal.com/developers/gitignore)
