@@ -4,232 +4,207 @@ from decimal import Decimal
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional
 
-# --- CONSTANTES DE MAPEAMENTO ---
+# --- TABELAS DE DOMÍNIO ---
 
-# Traduz os códigos numéricos para a descrição do serviço
+# Mapeia os códigos numéricos de operação para a sua descrição textual
 DESCRICAO_OPERACOES = {
-    # Pagamentos (Códigos < 50)
+    # Códigos < 50: Pagamentos (Débitos)
     1: "Água", 2: "Gás", 3: "Electricidade", 4: "Gás/Electricidade",
-    5: "Telefone", 6: "Telex", 7: "Renda de casa", 8: "Ordenados",
-    9: "Fornecedores", 12: "Transferência",
-    # Recebimentos (Códigos >= 50)
+    5: "Telefone", 7: "Renda de casa", 8: "Ordenados", 9: "Fornecedores", 12: "Transferência",
+    # Códigos >= 50: Recebimentos (Créditos)
     51: "Água", 52: "Gás", 53: "Electricidade", 54: "Gás/Electricidade",
-    55: "Telefone", 56: "Telex", 57: "Renda de casa", 58: "Serviço Público Terrestre",
-    59: "Fornecedores", 60: "Seguro", 61: "Quotas", 62: "Transferência",
-    64: "Cobrança", 66: "Serviços Diversos", 71: "Reembolso IVA",
-    98: "Outros"
+    55: "Telefone", 58: "Serviço Público", 60: "Seguro", 64: "Cobrança", 98: "Outros"
 }
 
-# Traduz os códigos de retorno para o estado da transação
+# Mapeia os códigos de estado para a descrição do resultado da transação
 ESTADOS_CONTA = {
-    "00": "Sucesso (Lançamento Executado)",
-    "01": "Não existe autorização de débito",
-    "02": "Recusa de débito pelo banco",
-    "03": "Conta sem saldo ou saldo insuficiente",
-    "04": "Conta inexistente",
-    "05": "Registo inválido",
-    "06": "Cancelamento pelo cliente",
-    "18": "Autorização Caducada",
-    "20": "Suspensão"
+    "00": "Sucesso", "01": "Sem Autorização", "02": "Recusa Banco",
+    "03": "Saldo Insuficiente", "04": "Conta Inexistente", "05": "Registo Inválido",
+    "06": "Cancelamento Cliente", "20": "Suspensão"
 }
 
 @dataclass
 class PS2Operacao:
     """
-    Estrutura de dados para armazenar os detalhes de uma operação (Registo Tipo 2).
+    Estrutura de dados unificada que combina o contexto do ficheiro (Cabeçalho)
+    com os detalhes da transação (Movimento).
     """
-    linha_num: int
-    tipo_operacao_cod: int
-    tipo_operacao_desc: str
+    # Contexto do Ficheiro (Origem: Registo Tipo 1)
+    data_processamento: str
+    entidade_ordenante: str
+    
+    # Detalhe da Operação (Origem: Registo Tipo 2)
+    linha: int
     natureza: str           # 'PAGAMENTO' ou 'RECEBIMENTO'
-    valor: float            # Valor absoluto
-    valor_sinalizado: float # Negativo para saídas, positivo para entradas
+    valor: float            # Valor absoluto para cálculos
+    valor_sinalizado: float # Valor com sinal (- para débitos, + para créditos)
+    descricao: str
+    referencia_transf: str
+    adc: Optional[str]      # Número da Autorização de Débito (apenas para Cobranças)
     
     # Dados Bancários
-    nib_completo: str
-    banco: str
-    balcao: str
-    conta: str
+    nib_destino: str
     
-    # Estado e Referências
-    situacao_cod: str
-    situacao_desc: str
-    referencia_empresa: str
-    referencia_transferencia: str
-    adc_numero: Optional[str] = None # Número de Autorização de Débito em Conta
-    
-    sucesso: bool = True
+    # Estado da Transação
+    estado_cod: str
+    estado_desc: str
+    sucesso: bool
 
 class PS2Parser:
     def __init__(self, pasta_dados: str):
         self.pasta_dados = pasta_dados
-        self.registos: List[Dict] = []
         self.erros: List[str] = []
 
-    def _ler_valor_monetario(self, texto: str) -> Decimal:
-        """
-        Converte string numérica (ex: '0000000024750') para Decimal,
-        assumindo que os últimos 2 dígitos são casas decimais.
-        """
+    def _parse_decimal(self, val_str: str) -> Decimal:
+        """Converte string financeira (sem ponto) para Decimal, assumindo 2 casas decimais."""
         try:
-            return Decimal(texto) / Decimal(100)
+            return Decimal(val_str) / Decimal(100)
         except:
             return Decimal(0)
 
-    def processar_linha_tipo_2(self, linha: str, num_linha: int) -> Optional[PS2Operacao]:
+    def processar_ficheiro(self, caminho_completo: str, nome_ficheiro: str) -> List[dict]:
         """
-        Processa uma linha de registo 'Tipo 2', extraindo campos por posição fixa.
+        Lê um ficheiro PS2 linha a linha, gerindo o estado (Cabeçalho -> Movimentos -> Rodapé).
         """
+        registos_ficheiro = []
+        
+        # Variáveis de Estado (Preenchidas pelo Tipo 1)
+        header_lido = False
+        data_processamento = None
+        entidade_ordenante = None
+        
+        # Acumuladores para Validação de Integridade (Verificados no Tipo 9)
+        soma_valores = Decimal(0)
+        contagem_registos = 0
+        
         try:
-            # Extração posicional dos campos obrigatórios
-            op_code = int(linha[4:6])
-            situacao = linha[6:8]
-            
-            # Reconstrução do NIB
-            banco = linha[9:13]
-            balcao = linha[13:17]
-            conta = linha[17:28]
-            controlo = linha[28:30]
-            nib = f"{banco}{balcao}{conta}{controlo}"
-            
-            # Conversão do valor monetário
-            valor_raw = linha[30:43]
-            valor_dec = self._ler_valor_monetario(valor_raw)
-            
-            # Extração de referências de texto
-            ref_empresa = linha[43:63].strip()
-            ref_transf = linha[63:78].strip()
+            # Utiliza 'latin-1' para suportar caracteres acentuados comuns em ficheiros bancários
+            with open(caminho_completo, 'r', encoding='latin-1') as f:
+                for i, linha in enumerate(f):
+                    linha = linha.strip('\n').strip('\r')
+                    num_linha = i + 1
 
-            # Lógica: Natureza da Operação (Débito vs Crédito)
-            # Códigos < 50 são Pagamentos (saída de dinheiro)
-            # Códigos >= 50 são Recebimentos (entrada de dinheiro)
-            if op_code < 50:
-                natureza = "PAGAMENTO"
-                valor_final = -float(valor_dec)
-            else:
-                natureza = "RECEBIMENTO"
-                valor_final = float(valor_dec)
+                    # Ignora linhas que não cumpram o formato base
+                    if not linha.startswith("PS2"):
+                        continue
 
-            # Lógica: Extração de ADC para Cobranças
-            # Se for cobrança (>=50), as primeiras 11 posições da referência são o ADC
-            adc = None
-            if op_code >= 50 and len(ref_empresa) >= 11:
-                adc = ref_empresa[:11].strip()
+                    tipo_registo = linha[3] # O tipo está na 4ª posição (índice 3)
 
-            # Definição do estado da transação
-            estado_desc = ESTADOS_CONTA.get(situacao, f"Estado desconhecido ({situacao})")
-            sucesso = (situacao == "00")
+                    # --- TIPO 1: CABEÇALHO (Contexto) ---
+                    if tipo_registo == '1':
+                        data_processamento = linha[33:41]
+                        entidade_ordenante = linha[41:61].strip()
+                        header_lido = True
 
-            return PS2Operacao(
-                linha_num=num_linha,
-                tipo_operacao_cod=op_code,
-                tipo_operacao_desc=DESCRICAO_OPERACOES.get(op_code, "Outros"),
-                natureza=natureza,
-                valor=float(valor_dec),
-                valor_sinalizado=valor_final,
-                nib_completo=nib,
-                banco=banco,
-                balcao=balcao,
-                conta=conta,
-                situacao_cod=situacao,
-                situacao_desc=estado_desc,
-                referencia_empresa=ref_empresa,
-                referencia_transferencia=ref_transf,
-                adc_numero=adc,
-                sucesso=sucesso
-            )
-
-        except Exception as e:
-            self.erros.append(f"Linha {num_linha}: Erro ao processar registo Tipo 2 - {e}")
-            return None
-
-    def carregar_tudo(self) -> List[dict]:
-        """
-        Percorre a pasta configurada, lê todos os ficheiros .ps2 e retorna a lista consolidada.
-        """
-        todos_dados = []
-
-        if not os.path.exists(self.pasta_dados):
-            print(f"Erro: Pasta '{self.pasta_dados}' não encontrada.")
-            return []
-
-        for nome_arq in os.listdir(self.pasta_dados):
-            if not nome_arq.endswith(".ps2"):
-                continue
-
-            caminho = os.path.join(self.pasta_dados, nome_arq)
-            print(f"A processar: {nome_arq}...")
-
-            # Acumuladores para validação do rodapé (checksum)
-            soma_calculada = Decimal(0)
-            count_calculado = 0
-            
-            try:
-                # 'latin-1' é o padrão comum para ficheiros bancários antigos/legados
-                with open(caminho, 'r', encoding='latin-1') as f:
-                    for i, linha in enumerate(f):
-                        linha = linha.strip('\n').strip('\r')
-                        
-                        # Ignora linhas que não comecem pelo identificador obrigatório
-                        if not linha.startswith("PS2"):
+                    # --- TIPO 2: MOVIMENTO (Detalhe) ---
+                    elif tipo_registo == '2':
+                        if not header_lido:
+                            self.erros.append(f"{nome_ficheiro}: Registo de movimento encontrado sem cabeçalho prévio.")
                             continue
 
-                        tipo = linha[3]
-
-                        if tipo == '2':
-                            # Processa detalhe
-                            op = self.processar_linha_tipo_2(linha, i+1)
-                            if op:
-                                op_dict = asdict(op)
-                                op_dict['ficheiro'] = nome_arq
-                                todos_dados.append(op_dict)
-                                
-                                # Atualiza acumuladores
-                                soma_calculada += Decimal(str(op.valor))
-                                count_calculado += 1
+                        # Extração posicional dos campos
+                        op_code = int(linha[4:6])
+                        situacao = linha[6:8]
                         
-                        elif tipo == '9':
-                            # Processa rodapé e valida integridade
-                            qtd_total_ps2 = int(linha[15:29])
-                            valor_total_ps2 = Decimal(linha[29:42]) / Decimal(100)
-                            
-                            if count_calculado != qtd_total_ps2:
-                                self.erros.append(f"{nome_arq}: Erro contagem (Lido: {count_calculado} vs Header: {qtd_total_ps2})")
-                            
-                            if soma_calculada != valor_total_ps2:
-                                self.erros.append(f"{nome_arq}: Erro soma valor (Lido: {soma_calculada} vs Header: {valor_total_ps2})")
+                        # Reconstrução do NIB (Banco + Balcão + Conta + Controlo)
+                        nib = f"{linha[9:13]}{linha[13:17]}{linha[17:28]}{linha[28:30]}"
+                        
+                        # Tratamento do Valor Monetário
+                        valor_dec = self._parse_decimal(linha[30:43])
+                        
+                        # Referências textuais
+                        ref_empresa = linha[43:63].strip()
+                        ref_transf = linha[63:78].strip()
 
-            except Exception as e:
-                self.erros.append(f"Erro fatal em {nome_arq}: {e}")
+                        # Lógica de Negócio: Determinar Natureza (Pagamento vs Recebimento)
+                        if op_code < 50:
+                            natureza = "PAGAMENTO"
+                            sinalizado = -float(valor_dec)
+                        else:
+                            natureza = "RECEBIMENTO"
+                            sinalizado = float(valor_dec)
 
-        # Exibe erros acumulados no final do processamento
+                        # Lógica Específica: Extração de ADC para Cobranças
+                        adc_num = None
+                        if op_code >= 50 and len(ref_empresa) >= 11:
+                            adc_num = ref_empresa[:11].strip()
+
+                        # Criação do Objeto Consolidado
+                        op_obj = PS2Operacao(
+                            data_processamento=data_processamento,
+                            entidade_ordenante=entidade_ordenante,
+                            linha=num_linha,
+                            natureza=natureza,
+                            valor=float(valor_dec),
+                            valor_sinalizado=sinalizado,
+                            descricao=ref_empresa,
+                            referencia_transf=ref_transf,
+                            adc=adc_num,
+                            nib_destino=nib,
+                            estado_cod=situacao,
+                            estado_desc=ESTADOS_CONTA.get(situacao, "Desconhecido"),
+                            sucesso=(situacao == "00")
+                        )
+                        
+                        op_dict = asdict(op_obj)
+                        op_dict['ficheiro_origem'] = nome_ficheiro
+                        registos_ficheiro.append(op_dict)
+
+                        # Atualiza acumuladores para validação final
+                        soma_valores += valor_dec
+                        contagem_registos += 1
+
+                    # --- TIPO 9: RODAPÉ (Validação) ---
+                    elif tipo_registo == '9':
+                        total_qtd_declarada = int(linha[15:29])
+                        total_val_declarado = self._parse_decimal(linha[29:42])
+
+                        # Validação Cruzada: Comparar valores lidos com valores declarados
+                        if contagem_registos != total_qtd_declarada:
+                            self.erros.append(f"{nome_ficheiro}: Quantidade inconsistente (Lido: {contagem_registos} | Esperado: {total_qtd_declarada})")
+                        
+                        if soma_valores != total_val_declarado:
+                            self.erros.append(f"{nome_ficheiro}: Valor total inconsistente (Lido: {soma_valores} | Esperado: {total_val_declarado})")
+
+        except Exception as e:
+            self.erros.append(f"Erro crítico ao processar {nome_ficheiro}: {str(e)}")
+            
+        return registos_ficheiro
+
+    def carregar_tudo(self) -> List[dict]:
+        """Percorre a diretoria alvo e processa todos os ficheiros .ps2 encontrados."""
+        todos = []
+        if not os.path.exists(self.pasta_dados):
+            return []
+            
+        for f in os.listdir(self.pasta_dados):
+            if f.endswith(".ps2"):
+                caminho = os.path.join(self.pasta_dados, f)
+                print(f"A processar: {f}...")
+                todos.extend(self.processar_ficheiro(caminho, f))
+        
         if self.erros:
-            print("\n⚠️ AVISOS DE PROCESSAMENTO:")
-            for erro in self.erros:
-                print(f" - {erro}")
-
-        return todos_dados
+            print("\n⚠️  AVISOS DE PROCESSAMENTO:")
+            for e in self.erros: print(f" - {e}")
+            
+        return todos
 
 # --- TESTE UNITÁRIO ---
 if __name__ == "__main__":
     parser = PS2Parser("data")
     dados = parser.carregar_tudo()
-
+    
     if dados:
-        print(f"\n✅ Processamento concluído. {len(dados)} registos extraídos.")
+        print(f"\n✅ Processamento Concluído.")
+        print(f"Total de Registos Extraídos: {len(dados)}")
         
-        # Filtra rejeições
-        rejeicoes = [d for d in dados if not d['sucesso']]
-        if rejeicoes:
-            print(f"\n❌ ATENÇÃO: {len(rejeicoes)} operações com erro/rejeitadas:")
-            for rej in rejeicoes:
-                print(f"   - Linha {rej['linha_num']}: {rej['situacao_desc']} | Valor: {rej['valor']}€")
+        # Exemplo de acesso aos dados consolidados
+        primeiro = dados[0]
+        print(f"Ficheiro de Origem: {primeiro['ficheiro_origem']}")
+        print(f"Data de Processamento: {primeiro['data_processamento']}")
+        print(f"Entidade: {primeiro['entidade_ordenante']}")
 
-        # Calcula saldo (apenas sucessos)
+        #Cálculo Saída
         saldo = sum(d['valor_sinalizado'] for d in dados if d['sucesso'])
-        print(f"\n💰 SALDO LÍQUIDO (Sucessos): {saldo:.2f} €")
-        
-        # Mostra exemplo da estrutura
-        if len(dados) > 0:
-            print("\n🔍 Exemplo de Registo Completo:")
-            print(json.dumps(dados[0], indent=2, ensure_ascii=False))
+        print(f"Saldo Líquido (Operações com Sucesso): {saldo:.2f} €")
+
