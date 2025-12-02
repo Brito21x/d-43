@@ -23,3 +23,13 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 | _A4_   |       configuracao-psp  |     Criação do branch "configuração-psp", criando um ficheiro de leitura e estruturação de dados para ficheiros ps2.                  |
 
 ## Observações / Decisões
+
+## Semana 3 - [01 de Dezembro até 5 de Dezembro]
+| #      | Branch  | Descrição de Tarefas |
+| -----  | -----   | -------------------- |
+| _A1_   |   configuracao-ps2     |      Atualização do Código do Ficheiro parser.py e atualização do planeamento     |
+| _A2_   |   configuracao-ps2     |      Atualização do Código do Ficheiro parser.py     |
+| _A3_   |         |                      |
+| _A4_   |  configuracao-ps2     |      Atualização do Código do Ficheiro parser.py     |
+
+## Observações / Decisões
