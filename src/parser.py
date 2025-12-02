@@ -203,7 +203,7 @@ if __name__ == "__main__":
         print(f"Ficheiro de Origem: {primeiro['ficheiro_origem']}")
         print(f"Data de Processamento: {primeiro['data_processamento']}")
         print(f"Entidade: {primeiro['entidade_ordenante']}")
-        
-        # Cálculo de Saldo
+
+        #Cálculo Saída
         saldo = sum(d['valor_sinalizado'] for d in dados if d['sucesso'])
         print(f"Saldo Líquido (Operações com Sucesso): {saldo:.2f} €")
