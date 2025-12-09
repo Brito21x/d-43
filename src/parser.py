@@ -208,3 +208,5 @@ if __name__ == "__main__":
         saldo = sum(d['valor_sinalizado'] for d in dados if d['sucesso'])
         print(f"Saldo Líquido (Operações com Sucesso): {saldo:.2f} €")
 
+    
+
