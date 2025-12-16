@@ -1,3 +1,4 @@
+
 def converter_int(valor_str ):
         return   int( valor_str)
 
@@ -51,4 +52,3 @@ print(resultado)
 # --
 resultado = ler_ficheiro('../data/DD_2025_10.ps2')
 print(resultado)
-
