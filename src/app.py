@@ -5,15 +5,14 @@ import pandas as pd
 from pathlib import Path
 import sys
 
-# Garante que conseguimos importar o parser que está na mesma pasta
+# Tenta importar o parser
 try:
     from parser import processar_toda_pasta
 except ImportError:
-    # Caso estejas a correr de uma forma diferente, tenta adicionar o caminho
     sys.path.append(str(Path(__file__).parent))
     from parser import processar_toda_pasta
 
-# --- 1. Configuração e Leitura de Dados ---
+# --- 1. Configuração e Leitura ---
 PASTA_SRC = Path(__file__).parent
 PASTA_DATA = PASTA_SRC.parent / "data"
 
@@ -27,13 +26,17 @@ else:
     print("ERRO: Pasta 'data' não encontrada!")
     df_global = pd.DataFrame()
 
-# --- 2. Interface Gráfica (UI) ---
+# --- Função Auxiliar ---
+def formatar_espacos(texto, n=4):
+    if not isinstance(texto, str): return str(texto)
+    return " ".join([texto[i:i+n] for i in range(0, len(texto), n)])
+
+# --- 2. Interface (UI) ---
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.h3("Dashboard Débitos"),
         ui.hr(),
         
-        # Filtro Data
         ui.input_date_range(
             "filtro_data", 
             "Selecionar Período:",
@@ -41,8 +44,6 @@ app_ui = ui.page_sidebar(
             end=df_global['data'].max().date() if not df_global.empty else None
         ),
         
-        # Filtro Clientes
-        # CORREÇÃO: Removemos o argumento 'placeholder' que estava a dar erro
         ui.input_selectize(
             "filtro_clientes", 
             "Filtrar Clientes (NIB):", 
@@ -54,26 +55,12 @@ app_ui = ui.page_sidebar(
     ),
     
     ui.layout_columns(
-        ui.value_box(
-            "Total Gasto", 
-            ui.output_text("kpi_valor"), 
-            theme="bg-gradient-blue-indigo"
-        ),
-        ui.value_box(
-            "Nº Movimentos", 
-            ui.output_text("kpi_qtd"), 
-            theme="text-primary"
-        ),
+        ui.value_box("Total Gasto", ui.output_text("kpi_valor"), theme="bg-gradient-blue-indigo"),
+        ui.value_box("Nº Movimentos", ui.output_text("kpi_qtd"), theme="text-primary"),
     ),
     ui.layout_columns(
-        ui.card(
-            ui.card_header("Evolução Temporal"),
-            output_widget("grafico_linha")
-        ),
-        ui.card(
-            ui.card_header("Top Clientes (Gastos)"),
-            output_widget("grafico_barras")
-        ),
+        ui.card(ui.card_header("Evolução Temporal"), output_widget("grafico_linha")),
+        ui.card(ui.card_header("Top Clientes (Gastos)"), output_widget("grafico_barras")),
     ),
     ui.card(
         ui.card_header("Dados Detalhados"),
@@ -81,25 +68,21 @@ app_ui = ui.page_sidebar(
     )
 )
 
-# --- 3. Lógica do Servidor (Server) ---
+# --- 3. Servidor ---
 def server(input, output, session):
 
     @reactive.calc
     def dados_filtrados():
         if df_global.empty: return pd.DataFrame()
-        
         df = df_global.copy()
         
-        # Filtro Data
         datas = input.filtro_data()
         if datas and datas[0] and datas[1]:
             df = df[(df['data'].dt.date >= datas[0]) & (df['data'].dt.date <= datas[1])]
         
-        # Filtro Clientes
         clientes = input.filtro_clientes()
         if clientes:
             df = df[df['cliente_nib'].isin(clientes)]
-            
         return df
 
     @render.text
@@ -115,21 +98,29 @@ def server(input, output, session):
     def grafico_linha():
         df = dados_filtrados()
         if df.empty: return None
-        # Agrupar por dia
-        df_dia = df.groupby('data')['valor'].sum().reset_index()
-        return px.line(df_dia, x='data', y='valor', markers=True, template="plotly_white")
+        # Agrupar por MÊS para o gráfico ficar mais limpo
+        df_tempo = df.groupby('data')['valor'].sum().reset_index()
+        
+        fig = px.line(df_tempo, x='data', y='valor', markers=True, template="plotly_white")
+        fig.update_xaxes(tickformat="%m/%Y", dtick="M1") # Mostra mês/ano no eixo X
+        return fig
 
     @render_widget
     def grafico_barras():
         df = dados_filtrados()
         if df.empty: return None
-        # Agrupar por cliente
         df_cli = df.groupby('cliente_nib')['valor'].sum().reset_index()
         df_cli = df_cli.sort_values(by='valor', ascending=False).head(10)
         return px.bar(df_cli, x='cliente_nib', y='valor', template="plotly_white")
 
     @render.data_frame
     def tabela_dados():
-        return render.DataGrid(dados_filtrados())
+        df_view = dados_filtrados().copy()
+        if not df_view.empty:
+            df_view['cliente_nib'] = df_view['cliente_nib'].apply(lambda x: formatar_espacos(x, 4))
+            if 'entidade_nif' in df_view.columns:
+                df_view['entidade_nif'] = df_view['entidade_nif'].apply(lambda x: formatar_espacos(x, 3))
+            df_view['data'] = df_view['data'].dt.strftime('%d/%m/%Y')
+        return render.DataGrid(df_view)
 
 app = App(app_ui, server)
