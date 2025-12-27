@@ -37,6 +37,12 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 2000000101000110099880077665544362839415700000000002498Fatura Eletricidade 07/2025
 900000000028779000010
 
+### Dashboard de Débitos com Recurso ao 'shiny' (Mês Julho)
+
+[Dashboard Débitos Diretos Julho](./DashboardDebitos.png)
+
+
+
 ## Referências WEB
 
 [Configuração Inicial Gitignore](https://www.toptal.com/developers/gitignore)
