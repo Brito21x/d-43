@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import re
 
 def converter_int(valor_str):
     try:
@@ -17,7 +18,7 @@ def converter_euros(valor_str):
 
 def ler_ficheiro(path):
     """
-    Lê um ficheiro PS2 e devolve um dicionário estruturado.
+    Lê o conteúdo interno do ficheiro PS2.
     """
     objDebitoDireto = {}
     
@@ -34,7 +35,7 @@ def ler_ficheiro(path):
                     'quantidade': converter_int(linha[75:81]) 
                 }
                 objDebitoDireto = {
-                    'data': linha[1:9], 
+                    'data_interna': linha[1:9], 
                     'empresa': objEmpresa, 
                     'resumo': objResumo,
                     'movimentos': [] 
@@ -43,9 +44,15 @@ def ler_ficheiro(path):
             elif linha.startswith('2'):
                 # Movimento
                 if 'movimentos' in objDebitoDireto:
+                    # Lógica de separação NIF / NIB
+                    campo_identificacao = linha[11:41] # 30 caracteres
+                    c_nif = campo_identificacao[:9]    # Primeiros 9
+                    c_nib = campo_identificacao[9:]    # Restantes 21
+
                     objMovimento = { 
-                        'ordem': linha[8:11], 
-                        'nib': linha[11:41],
+                        'ordem': linha[8:11],
+                        'nif': c_nif,           # Novo campo
+                        'nib': c_nib,           # Agora só tem 21 digitos
                         'valor': converter_euros(linha[41:55]),
                         'descricao': linha[55:82].strip() 
                     }
@@ -55,7 +62,7 @@ def ler_ficheiro(path):
 
 def processar_toda_pasta(caminho_pasta):
     """
-    Lê todos os ficheiros .ps2 e devolve um DataFrame Pandas.
+    Lê ficheiros e devolve DataFrame com NIF e NIB separados.
     """
     lista_final = []
 
@@ -68,12 +75,23 @@ def processar_toda_pasta(caminho_pasta):
             path_completo = os.path.join(caminho_pasta, ficheiro)
             dados = ler_ficheiro(path_completo)
             
-            if dados and 'data' in dados:
-                data_proc = dados['data']
+            # Extrair data do nome do ficheiro (ex: DD_2025_01.ps2)
+            match = re.search(r"DD_(\d{4})_(\d{2})", ficheiro)
+            if match:
+                ano = match.group(1)
+                mes = match.group(2)
+                data_final = f"{ano}{mes}01" 
+            else:
+                data_final = dados.get('data_interna', '20250101')
+
+            if dados and 'movimentos' in dados:
+                entidade_nif = dados['empresa']['nif']
                 
-                for mov in dados.get('movimentos', []):
+                for mov in dados['movimentos']:
                     lista_final.append({
-                        "data": data_proc,
+                        "data": data_final,
+                        "entidade_nif": entidade_nif,
+                        "cliente_nif": mov['nif'], # Novo campo na tabela
                         "cliente_nib": mov['nib'],
                         "descricao": mov['descricao'],
                         "valor": mov['valor'],
@@ -82,16 +100,12 @@ def processar_toda_pasta(caminho_pasta):
 
     df = pd.DataFrame(lista_final)
 
-    # Converter datas para o formato correto do Pandas
     if not df.empty:
         df['data'] = pd.to_datetime(df['data'], format='%Y%m%d', errors='coerce')
     
     return df
 
-# --- BLOCO DE PROTEÇÃO ---
-# Isto impede que o código corra sozinho quando é importado pelo app.py
 if __name__ == "__main__":
     print("--- Teste do Parser ---")
-    # Para testar, ajusta o caminho se necessário
     # df = processar_toda_pasta('../data')
     # print(df.head())
