@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import re  # Biblioteca para ler padrões de texto (Regex)
+import re
 
 def converter_int(valor_str):
     try:
@@ -34,7 +34,6 @@ def ler_ficheiro(path):
                     'valorTotal': converter_euros(linha[62:75]),
                     'quantidade': converter_int(linha[75:81]) 
                 }
-                # Lemos a data interna, mas vamos ignorá-la se o nome do ficheiro for válido
                 objDebitoDireto = {
                     'data_interna': linha[1:9], 
                     'empresa': objEmpresa, 
@@ -45,9 +44,15 @@ def ler_ficheiro(path):
             elif linha.startswith('2'):
                 # Movimento
                 if 'movimentos' in objDebitoDireto:
+                    # Lógica de separação NIF / NIB
+                    campo_identificacao = linha[11:41] # 30 caracteres
+                    c_nif = campo_identificacao[:9]    # Primeiros 9
+                    c_nib = campo_identificacao[9:]    # Restantes 21
+
                     objMovimento = { 
-                        'ordem': linha[8:11], 
-                        'nib': linha[11:41],
+                        'ordem': linha[8:11],
+                        'nif': c_nif,           # Novo campo
+                        'nib': c_nib,           # Agora só tem 21 digitos
                         'valor': converter_euros(linha[41:55]),
                         'descricao': linha[55:82].strip() 
                     }
@@ -57,7 +62,7 @@ def ler_ficheiro(path):
 
 def processar_toda_pasta(caminho_pasta):
     """
-    Lê ficheiros e usa o NOME do ficheiro para definir a data.
+    Lê ficheiros e devolve DataFrame com NIF e NIB separados.
     """
     lista_final = []
 
@@ -70,26 +75,23 @@ def processar_toda_pasta(caminho_pasta):
             path_completo = os.path.join(caminho_pasta, ficheiro)
             dados = ler_ficheiro(path_completo)
             
-            # --- LÓGICA NOVA: Extrair data do nome do ficheiro ---
-            # Procura padrão: DD_ + 4 digitos (ano) + _ + 2 digitos (mes)
+            # Extrair data do nome do ficheiro (ex: DD_2025_01.ps2)
             match = re.search(r"DD_(\d{4})_(\d{2})", ficheiro)
-            
             if match:
-                ano = match.group(1) # ex: 2025
-                mes = match.group(2) # ex: 01
-                # Forçamos o dia 01 para ficar ordenado no gráfico
+                ano = match.group(1)
+                mes = match.group(2)
                 data_final = f"{ano}{mes}01" 
             else:
-                # Se o nome do ficheiro não tiver data, usa a do cabeçalho
                 data_final = dados.get('data_interna', '20250101')
 
             if dados and 'movimentos' in dados:
-                nif_empresa = dados['empresa']['nif']
+                entidade_nif = dados['empresa']['nif']
                 
                 for mov in dados['movimentos']:
                     lista_final.append({
-                        "data": data_final,  # Agora usa a data do nome do ficheiro
-                        "entidade_nif": nif_empresa,
+                        "data": data_final,
+                        "entidade_nif": entidade_nif,
+                        "cliente_nif": mov['nif'], # Novo campo na tabela
                         "cliente_nib": mov['nib'],
                         "descricao": mov['descricao'],
                         "valor": mov['valor'],

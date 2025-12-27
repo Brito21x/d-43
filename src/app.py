@@ -21,6 +21,11 @@ print(f"A ler dados de: {PASTA_DATA}")
 
 if PASTA_DATA.exists():
     df_global = processar_toda_pasta(str(PASTA_DATA))
+    
+    # Filtro de Segurança
+    if not df_global.empty and 'data' in df_global.columns:
+        df_global = df_global[df_global['data'].dt.year >= 2024]
+        
     print(f"Sucesso: {len(df_global)} registos carregados.")
 else:
     print("ERRO: Pasta 'data' não encontrada!")
@@ -98,11 +103,23 @@ def server(input, output, session):
     def grafico_linha():
         df = dados_filtrados()
         if df.empty: return None
-        # Agrupar por MÊS para o gráfico ficar mais limpo
-        df_tempo = df.groupby('data')['valor'].sum().reset_index()
         
-        fig = px.line(df_tempo, x='data', y='valor', markers=True, template="plotly_white")
-        fig.update_xaxes(tickformat="%m/%Y", dtick="M1") # Mostra mês/ano no eixo X
+        df_tempo = df.groupby('data')['valor'].sum().reset_index().sort_values('data')
+        
+        # Converter para texto para o gráfico
+        df_tempo['data_txt'] = df_tempo['data'].dt.strftime('%Y-%m-%d')
+        
+        fig = px.line(df_tempo, x='data_txt', y='valor', markers=True, template="plotly_white")
+        
+        fig.update_xaxes(
+            title_text="Data",
+            type='date', 
+            tickformat="%d/%m/%Y",
+            tickangle=-45
+        )
+        fig.update_layout(yaxis_title="Total (€)", hovermode="x unified")
+        fig.update_traces(hovertemplate="<b>Data:</b> %{x|%d/%m/%Y}<br><b>Total:</b> %{y:.2f} €<extra></extra>")
+        
         return fig
 
     @render_widget
@@ -111,16 +128,47 @@ def server(input, output, session):
         if df.empty: return None
         df_cli = df.groupby('cliente_nib')['valor'].sum().reset_index()
         df_cli = df_cli.sort_values(by='valor', ascending=False).head(10)
-        return px.bar(df_cli, x='cliente_nib', y='valor', template="plotly_white")
+        
+        fig = px.bar(df_cli, x='cliente_nib', y='valor', template="plotly_white")
+        fig.update_layout(xaxis_title="Cliente (NIB)", yaxis_title="Total (€)", xaxis_tickangle=-45)
+        return fig
 
     @render.data_frame
     def tabela_dados():
         df_view = dados_filtrados().copy()
         if not df_view.empty:
+            
+            # --- 1. ORDENAR POR DATA (A Correção é Aqui) ---
+            # ascending=True mete do mais antigo para o mais recente
+            # ascending=False mete do mais recente para o mais antigo
+            df_view = df_view.sort_values(by='data', ascending=True)
+
+            # --- 2. Formatações Visuais ---
             df_view['cliente_nib'] = df_view['cliente_nib'].apply(lambda x: formatar_espacos(x, 4))
+            
+            if 'cliente_nif' in df_view.columns:
+                df_view['cliente_nif'] = df_view['cliente_nif'].apply(lambda x: formatar_espacos(x, 3))
+
             if 'entidade_nif' in df_view.columns:
                 df_view['entidade_nif'] = df_view['entidade_nif'].apply(lambda x: formatar_espacos(x, 3))
+                
             df_view['data'] = df_view['data'].dt.strftime('%d/%m/%Y')
+            
+            # --- 3. Selecionar e Traduzir Colunas ---
+            colunas_ordem = ['data', 'entidade_nif', 'cliente_nif', 'cliente_nib', 'descricao', 'valor', 'ordem']
+            cols_finais = [c for c in colunas_ordem if c in df_view.columns]
+            df_view = df_view[cols_finais]
+
+            df_view = df_view.rename(columns={
+                'data': 'Data',
+                'entidade_nif': 'NIF Entidade',
+                'cliente_nif': 'NIF Cliente',
+                'cliente_nib': 'NIB Cliente',
+                'descricao': 'Descrição',
+                'valor': 'Valor (€)',
+                'ordem': 'ID'
+            })
+
         return render.DataGrid(df_view)
 
 app = App(app_ui, server)
