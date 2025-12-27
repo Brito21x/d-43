@@ -39,7 +39,7 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 
 ### Dashboard de Débitos com Recurso ao 'shiny' (Mês Julho)
 
-[Dashboard Débitos Diretos Julho](./DashboardDebitos.png)
+![Dashboard Débitos Diretos Julho](./DashboardDebitos.png)
 
 
 
