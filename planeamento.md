@@ -7,8 +7,8 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 ## Semana 1 - [17 de Novembro até 21 de Novembro]
 | #      | Branch  | Descrição de Tarefas |
 | -----  | -----   | -------------------- |
-| _A1_   |    planeamento     |  Criação de uma branch "planemento" para servir como guia do projeto + Atualização do README                    |
-| _A2_   |         |       Atualização do README             |
+| _A1_   |    planeamento     |  Criação de uma branch "planeamento" para servir como guia do projeto + Atualização do README                    |
+| _A2_   |      planeamento + configuracao-inicial   |       Atualização do README             |
 | _A3_   |         |                      |
 | _A4_   |         |                      |
 
@@ -20,7 +20,7 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 | _A1_   |     planeamento + configuracao-inicial    |      Criação da branch "configuração-inicial" com o README e .gitignore inseridos.                |
 | _A2_   |    configuracao-inicial     |    Criação da branch "configuração-inicial" com .gitignore.                  |
 | _A3_   |         |                      |
-| _A4_   |       configuracao-psp  |     Criação do branch "configuração-psp", criando um ficheiro de leitura e estruturação de dados para ficheiros ps2.                  |
+| _A4_   |       configuracao-ps2  |     Criação do branch "configuração-psp", criando um ficheiro de leitura e estruturação de dados para ficheiros ps2.                  |
 
 ## Observações / Decisões
 
@@ -47,9 +47,19 @@ Licenciatura em Engenharia de Sistemas Informáticos (*regime laboral*) 2025-26
 ## Semana 5 - [15 de Dezembro até 19 de Dezembro]
 | #      | Branch  | Descrição de Tarefas |
 | -----  | -----   | -------------------- |
-| _A1_   | planeamento + doxygen + configuracao-shiny |Atualização do Planeamento, Continuação do Doxygen + Inicialização da framework "shiny" |
-| _A2_   |    ||
-| _A3_   |      |             |
-| _A4_   |  |  |
+| _A1_   | planeamento + doxygen + configuracao-shiny |Atualização do Planeamento, Finalização do Doxygen + Inicialização da framework "shiny" |
+| _A2_   |  configuracao-shiny  | Inicialização da framework "Shiny" e tentar terminar a mesma|
+| _A3_   |    relatorio-latex  | Começo do Relatório em LATEX       |
+| _A4_   |  relatorio-latex | Começo do Relatório em LATEX |
+
+## Observações / Decisões
+
+## Semana 6 - [22 de Dezembro até 26 de Dezembro]
+| #      | Branch  | Descrição de Tarefas |
+| -----  | -----   | -------------------- |
+| _A1_   | planeamento |Atualização do Planeamento + Atualização do README.md|
+| _A2_   |  configuracao-shiny  |Configuração final do Shiny|
+| _A3_   |   relatorio-latex   |   Finalização do Relatório do trabalho em LATEX          |
+| _A4_   | relatorio-latex |  Finalização do Relatório do Trabalho em LATEX|
 
 ## Observações / Decisões
