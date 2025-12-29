@@ -1,0 +1,46 @@
+\chapter {Desenvolvimento}
+
+Neste capítulo são detalhadas as opções técnicas tomadas durante a implementação da solução, focando-se na arquitetura do sistema, no processamento dos ficheiros bancários e na construção da interface interativa.
+
+\section {Arquitetura da Solução}
+A solução foi desenvolvida de forma modular, separando a lógica de leitura de dados da lógica de visualização. O fluxo de dados ocorre da seguinte forma:
+\begin{enumerate}
+    \item Leitura dos ficheiros \texttt{.ps2} através do módulo \texttt{parser.py};
+    \item Conversão e limpeza dos dados utilizando a biblioteca \texttt{pandas};
+    \item Renderização da interface web e gestão de eventos através do \texttt{Shiny}.
+\end{enumerate}
+
+\subsection{Módulo de Leitura (Parser)}
+O módulo \texttt{parser.py} é responsável pela extração de informação bruta. Um dos desafios superados foi a interpretação do identificador único do cliente.  
+Conforme implementado, o sistema divide o campo de 30 caracteres nos seus componentes lógicos:
+
+\begin{verbatim}
+campo_identificacao = linha[11:41] # 30 caracteres totais
+c_nif = campo_identificacao[:9]    # Primeiros 9 sao o NIF
+c_nib = campo_identificacao[9:]    # Restantes 21 sao o NIB
+\end{verbatim}
+
+\section{Engenharia de Dados}
+Para garantir a consistência temporal, foi implementado um mecanismo de validação que prioriza a data presente no nome do ficheiro (por exemplo, \verb|DD_2025_01.ps2|) em detrimento de datas internas incorretas.  
+Adicionalmente, são filtrados registos anteriores a 2024, de forma a evitar inconsistências gráficas e estatísticas.
+
+\section{Interface e Interatividade}
+
+A interface gráfica foi construída com a framework \textit{Shiny for Python}, aproveitando a sua capacidade de criar aplicações web robustas diretamente em Python. Esta escolha permitiu uma integração nativa com as ferramentas de análise de dados previamente desenvolvidas.
+
+\vspace{0.5cm}
+
+A interatividade é gerida através de funções reativas (\verb|@reactive.calc|), que filtram o \textit{DataFrame} global sempre que o utilizador altera o intervalo de datas ou seleciona um cliente específico. Este paradigma garante que o processamento só ocorre quando há uma mudança efetiva nos inputs.
+
+\vspace{0.5cm}
+
+Estas alterações de estado atualizam instantaneamente os componentes visuais, nomeadamente os gráficos gerados pela biblioteca \texttt{plotly}. A natureza dinâmica destes gráficos permite ao utilizador explorar pontos de dados individuais e exportar visualizações em tempo real.
+
+
+
+
+
+
+
+
+

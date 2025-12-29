@@ -1,0 +1,49 @@
+\chapter {Introdução}
+
+
+No âmbito da unidade curricular de Laboratórios de Informática, foi desenvolvido o presente trabalho com o objetivo de consolidar conhecimentos práticos relacionados com controlo de versões, trabalho colaborativo e organização de projetos em grupo, recorrendo a ferramentas amplamente utilizadas no contexto profissional da informática.
+
+\vspace*{0.5cm}
+
+Para a realização do trabalho, foi utilizado o GitHub como plataforma central de versionamento e partilha de código, permitindo uma gestão eficiente do projeto e uma clara distribuição de tarefas entre os membros do grupo. Cada elemento ficou responsável por diferentes partes do trabalho, sendo possível acompanhar a evolução individual e coletiva através do histórico de commits, branches e pull requests disponibilizados pelo GitHub.
+
+\vspace*{0.5cm}
+
+O desenvolvimento foi efetuado recorrendo ao Visual Studio Code (VS Code) como ambiente de desenvolvimento integrado, em conjunto com uma máquina virtual Ubuntu, onde foram realizados os commits diretamente através da consola, promovendo o contacto prático com os comandos Git e com um ambiente Linux. Esta abordagem permitiu compreender melhor o funcionamento do controlo de versões em contexto real, bem como reforçar competências ao nível da linha de comandos.
+
+\vspace*{0.5cm}
+
+Desta forma, o GitHub assumiu um papel fundamental na coordenação do trabalho em equipa, garantindo a integridade do projeto, facilitando a colaboração entre os membros do grupo e assegurando uma organização clara e estruturada das tarefas atribuídas. Este trabalho contribuiu, assim, para o desenvolvimento de competências técnicas e colaborativas essenciais para a formação em Engenharia Informática.
+
+\vspace{6cm}
+
+
+\section{Objetivos}
+
+O presente trabalho prático tem como objetivo principal a conceção e implementação de uma solução de software, baseada na linguagem Python, para o processamento e visualização de dados bancários de débitos diretos.
+
+\vspace*{0.5cm}
+
+O projeto visa transformar ficheiros de texto em formato proprietário (PS2) em informação visual útil para a tomada de decisão, através de um Dashboard interativo.
+
+\vspace*{0.5cm}
+
+Para alcançar este propósito, foram definidos os seguintes objetivos específicos:
+
+\begin{itemize}
+    \item \textbf{Processamento de Dados (Parsing):} Desenvolvimento de um módulo capaz de ler e interpretar ficheiros de texto estruturados, extraindo informações vitais como montantes, datas e descrições, e lidando com identificadores compostos (separação de NIF e NIB).
+
+    \item \textbf{Limpeza e Organização de Dados:} O desenvolvimento do ficheiro .gitignore (O ficheiro .gitignore é um simples ficheiro de texto colocado na raiz de um repositório Git. O seu papel é essencial para manter o teu projeto organizado e seguro.)  para garantir que, se outra pessoa descarregar o teu código, ela receba exatamente o que precisa para correr o projeto, sem levar "entulho" do teu computador pessoal.
+    
+    \item \textbf{Engenharia de Dados:} Utilização da biblioteca \texttt{pandas} para limpeza, normalização e agregação dos dados, garantindo a filtragem de registos inválidos ou fora do período de análise.
+
+    \item \textbf{Visualização Interativa:} Criação de uma interface web reativa utilizando a framework \textit{Shiny for Python}, que permita ao utilizador filtrar dados por intervalo temporal e por cliente.
+
+    \item \textbf{Representação Gráfica:} Implementação de gráficos dinâmicos com \texttt{plotly} para análise de:
+    \begin{itemize}
+        \item Evolução temporal dos gastos (Gráfico de Linhas);
+        \item Identificação dos clientes com maior volume de débitos (Gráfico de Barras).
+    \end{itemize}
+
+    \item \textbf{Boas Práticas de Desenvolvimento:} Organização modular do código, utilização de ambientes virtuais (\textit{venv}) e automação de tarefas através de \textit{Makefiles}.
+\end{itemize}

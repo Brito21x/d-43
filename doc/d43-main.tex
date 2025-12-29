@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage{csquotes}
+
+% Idioma
+\usepackage[portuguese]{babel}
+
+% Codificação
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Margens
+\usepackage{geometry}
+\geometry{left=3cm,right=2.5cm,top=3cm,bottom=2.5cm}
+
+% Gráficos e imagens
+\usepackage{graphicx}
+\usepackage{float}
+
+% Links
+\usepackage{hyperref}
+
+% Bibliografia
+\usepackage{biblatex}
+\addbibresource{referencias.bib}
+
+\begin{document}
+
+\input{capas/capa}
+
+\tableofcontents
+\newpage
+
+\input{capitulos/01_introducao.tex}
+\input{capitulos/02_desenvolvimento.tex}
+\input{capitulos/03_conclusao.tex}
+
+
+\printbibliography
+
+\end{document}
