@@ -5,7 +5,7 @@ import re
 def converter_int(valor_str):
     try:
         return int(valor_str)
-    except ValueError:
+    except (ValueError, TypeError):
         return 0
 
 def converter_euros(valor_str):
@@ -13,7 +13,7 @@ def converter_euros(valor_str):
         valor_int = int(valor_str)
         valor_float = valor_int / 100.0
         return valor_float
-    except ValueError:
+    except (ValueError, TypeError):
         return 0.0
 
 def ler_ficheiro(path):
@@ -27,8 +27,8 @@ def ler_ficheiro(path):
 
     with open(path, encoding="utf-8") as f:
         for linha in f:
+            linha = linha.rstrip("\r\n")
             if linha.startswith('1'):
-                # Cabeçalho
                 objEmpresa = { 'designacao': linha[9:52].strip(), 'nif': linha[52:62].strip() }
                 objResumo = {
                     'valorTotal': converter_euros(linha[62:75]),
@@ -42,17 +42,15 @@ def ler_ficheiro(path):
                 }
                 
             elif linha.startswith('2'):
-                # Movimento
                 if 'movimentos' in objDebitoDireto:
-                    # Lógica de separação NIF / NIB
-                    campo_identificacao = linha[11:41] # 30 caracteres
-                    c_nif = campo_identificacao[:9]    # Primeiros 9
-                    c_nib = campo_identificacao[9:]    # Restantes 21
+                    campo_identificacao = linha[11:41]
+                    c_nif = campo_identificacao[:9]
+                    c_nib = campo_identificacao[9:]
 
                     objMovimento = { 
                         'ordem': linha[8:11],
-                        'nif': c_nif,           # Novo campo
-                        'nib': c_nib,           # Agora só tem 21 digitos
+                        'nif': c_nif,
+                        'nib': c_nib,
                         'valor': converter_euros(linha[41:55]),
                         'descricao': linha[55:82].strip() 
                     }
@@ -70,12 +68,11 @@ def processar_toda_pasta(caminho_pasta):
         print(f"Erro: Pasta não encontrada: {caminho_pasta}")
         return pd.DataFrame()
 
-    for ficheiro in os.listdir(caminho_pasta):
-        if ficheiro.endswith(".ps2"):
+    for ficheiro in sorted(os.listdir(caminho_pasta)):
+        if ficheiro.lower().endswith(".ps2"):
             path_completo = os.path.join(caminho_pasta, ficheiro)
             dados = ler_ficheiro(path_completo)
             
-            # Extrair data do nome do ficheiro (ex: DD_2025_01.ps2)
             match = re.search(r"DD_(\d{4})_(\d{2})", ficheiro)
             if match:
                 ano = match.group(1)
@@ -91,7 +88,7 @@ def processar_toda_pasta(caminho_pasta):
                     lista_final.append({
                         "data": data_final,
                         "entidade_nif": entidade_nif,
-                        "cliente_nif": mov['nif'], # Novo campo na tabela
+                        "cliente_nif": mov['nif'],
                         "cliente_nib": mov['nib'],
                         "descricao": mov['descricao'],
                         "valor": mov['valor'],
@@ -107,5 +104,3 @@ def processar_toda_pasta(caminho_pasta):
 
 if __name__ == "__main__":
     print("--- Teste do Parser ---")
-    # df = processar_toda_pasta('../data')
-    # print(df.head())
