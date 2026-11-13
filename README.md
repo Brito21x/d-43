@@ -1,5 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/SCAhhV0z)
-
 # 📊 Dashboard de Débitos Diretos (PS2)
 
 <p align="left">
@@ -13,8 +11,7 @@
 
 > **Unidade Curricular:** Laboratórios de Informática  
 > **Curso:** Licenciatura em Engenharia de Sistemas Informáticos (*Regime Laboral*) — Ano Letivo 2025/2026  
-> **Instituição:** Instituto Politécnico do Cávado e do Ave (IPCA)  
-> **Docente:** Prof. Óscar Ribeiro
+> **Instituição:** Instituto Politécnico do Cávado e do Ave (IPCA)
 
 ---
 
