@@ -1,176 +1,176 @@
-# 📊 Dashboard de Débitos Diretos (PS2)
+# Direct Debit Dashboard (PS2)
 
 <p align="left">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/Shiny_for_Python-v1.0%2B-blue?logo=rstudio&logoColor=white" alt="Shiny for Python">
+  <img src="https://img.shields.io/badge/Shiny_for_Python-v1.0%2B-blue?logo=posit&logoColor=white" alt="Shiny for Python">
   <img src="https://img.shields.io/badge/Pandas-2.0%2B-150458?logo=pandas&logoColor=white" alt="Pandas">
   <img src="https://img.shields.io/badge/Plotly-5.0%2B-3F4F75?logo=plotly&logoColor=white" alt="Plotly">
-  <img src="https://img.shields.io/badge/IPCA-LESI-009639" alt="IPCA LESI">
-  <img src="https://img.shields.io/badge/Status-Concluído-success" alt="Status">
+  <img src="https://img.shields.io/badge/UPCA-LESI-009639" alt="UPCA LESI">
+  <img src="https://img.shields.io/badge/Status-Completed-success" alt="Status">
 </p>
 
-> **Unidade Curricular:** Laboratórios de Informática  
-> **Curso:** Licenciatura em Engenharia de Sistemas Informáticos (*Regime Laboral*) — Ano Letivo 2025/2026  
-> **Instituição:** Instituto Politécnico do Cávado e do Ave (IPCA)
+> **Course:** Computer Science Laboratories  
+> **Degree:** B.Sc. in Computer Systems Engineering (*Daytime Program*) — Academic Year 2025/2026  
+> **Institution:** Polytechnic University of Cávado and Ave (UPCA)
 
 ---
 
-## 📑 Índice
+## Table of Contents
 
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Funcionalidades Principais](#-funcionalidades-principais)
-- [Estrutura do Repositório](#-estrutura-do-repositório)
-- [Tecnologias Utilizadas](#-tecnologias-utilizadas)
-- [Instalação e Execução](#-instalação-e-execução)
-- [Especificação do Formato PS2](#-especificação-do-formato-ps2)
-- [Demonstração](#-demonstração)
-- [Equipa de Desenvolvimento](#-equipa-de-desenvolvimento)
-- [Referências](#-referências)
-
----
-
-## 🎯 Sobre o Projeto
-
-O **Dashboard de Débitos Diretos** é uma solução de software desenvolvida para processar, validar e visualizar lotes mensais de débitos bancários diretos no formato proprietário **PS2** da entidade *IPCA Energy*.
-
-A aplicação faz a ponte entre dados brutos de largura fixa e uma interface analítica interativa construída em **Shiny for Python**, permitindo aos operadores financeiros inspecionar KPIs globais, auditar movimentos de clientes e explorar tendências temporais de liquidação em tempo real.
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Repository Structure](#repository-structure)
+- [Tech Stack](#tech-stack)
+- [Installation and Usage](#installation-and-usage)
+- [PS2 Format Specification](#ps2-format-specification)
+- [Demo](#demo)
+- [Development Team (Group 43)](#development-team-group-43)
+- [References](#references)
 
 ---
 
-## 🚀 Funcionalidades Principais
+## Overview
 
-* **Parser de Ficheiros PS2:** Extração automática de dados posicionais a partir de ficheiros bancários (cabeçalhos, registos de movimentos e totalizadores).
-* **Tratamento e Normalização de Dados:**
-  * Separação rigorosa do identificador de 30 caracteres em **NIF (9 dígitos)** e **NIB (21 dígitos)**;
-  * Conversão de valores monetários de cêntimos inteiros para euros decimais;
-  * Resolução temporal com base no identificador de ficheiro e validação de consistência.
-* **Dashboard Interativo e Reativo:**
-  * **Filtros Dinâmicos:** Seleção flexível de intervalos de datas e filtragem seletiva por cliente (NIB);
-  * **Indicadores Executivos (KPIs):** Total financeiro acumulado e contagem total de movimentos no período;
-  * **Gráfico de Evolução Temporal:** Linha temporal interativa com marcadores e formatação monetária (Plotly);
-  * **Top Clientes por Gasto:** Gráfico de barras ordenado com os maiores débitos acumulados;
-  * **Tabela de Dados Detalhada:** Grelha paginada, ordenada cronologicamente, com espaçamento formatado para facilitar a leitura de NIFs e NIBs.
+The **Direct Debit Dashboard** is a software solution built to parse, validate, and visualize monthly bank direct debit batches in the proprietary **PS2** format used by *IPCA Energy*.
+
+The application bridges raw fixed-width banking files and an interactive analytics interface powered by **Shiny for Python**, enabling finance teams to monitor high-level KPIs, audit customer transactions, and analyze settlement trends in real time.
 
 ---
 
-## 📁 Estrutura do Repositório
+## Key Features
 
-O projeto segue uma arquitetura limpa e modular:
+- **PS2 File Parser:** Automated positional data extraction from bank batch files (headers, transaction records, and control footers).
+- **Data Processing and Normalization:**
+  - Exact splitting of the 30-character customer identifier into a **9-digit Tax ID (NIF)** and a **21-digit Bank Account Number (NIB)**;
+  - Conversion of monetary values from integer cents to decimal euros;
+  - Date resolution based on the file identifier with built-in consistency validation.
+- **Interactive and Reactive Dashboard:**
+  - **Dynamic Filters:** Flexible date range selection and targeted filtering by customer (NIB);
+  - **Executive KPIs:** Cumulative financial volume and total transaction count for the selected period;
+  - **Time-Series Chart:** Interactive timeline with data markers and currency formatting (Plotly);
+  - **Top Customers by Spend:** Ranked bar chart highlighting the highest cumulative direct debits;
+  - **Detailed Data Table:** Paginated, chronologically sorted grid with formatted spacing for readable NIF and NIB inspection.
+
+---
+
+## Repository Structure
+
+The project follows a clean, modular structure:
 
 ```text
 d-43/
 ├── assets/
 │   └── img/
-│       └── DashboardDebitos.png   # Imagens e capturas de ecrã do dashboard
-├── data/                          # Dados de entrada (lotes mensais em formato PS2)
+│       └── DashboardDebitos.png   # Dashboard screenshots and visual assets
+├── data/                          # Input data (monthly batches in PS2 format)
 │   ├── DD_2025_01.ps2
 │   └── ...
-├── doc/                           # Documentação académica e relatório em LaTeX
+├── doc/                           # Academic documentation and LaTeX report
 │   ├── capas/
 │   │   └── capa.tex
 │   ├── capitulos/
 │   │   ├── 01_introducao.tex
 │   │   ├── 02_desenvolvimento.tex
 │   │   └── 03_conclusao.tex
-│   ├── d43-main.pdf               # Relatório final compilado
-│   └── d43-main.tex               # Ficheiro principal LaTeX
-├── ref/                           # Documentação técnica do código gerada pelo Doxygen
-│   ├── Doxyfile                   # Ficheiro de configuração do Doxygen
-│   ├── html/                      # Documentação em formato HTML
-│   └── latex/                     # Documentação em formato LaTeX
-├── src/                           # Código-fonte da aplicação
-│   ├── app.py                     # Aplicação web e dashboard reativo (Shiny)
-│   └── parser.py                  # Módulo de leitura e processamento de ficheiros PS2
-├── .gitignore                     # Configuração de ficheiros ignorados pelo Git
-├── Makefile                       # Automação de tarefas (instalar, executar e limpar)
-├── planeamento.md                 # Planeamento semanal e distribuição de tarefas
-├── README.md                      # Documentação principal do repositório
-└── requirements.txt               # Dependências Python do projeto
+│   ├── d43-main.pdf               # Compiled final report
+│   └── d43-main.tex               # Main LaTeX entry file
+├── ref/                           # Technical code documentation generated by Doxygen
+│   ├── Doxyfile                   # Doxygen configuration file
+│   ├── html/                      # HTML documentation output
+│   └── latex/                     # LaTeX documentation output
+├── src/                           # Application source code
+│   ├── app.py                     # Reactive web application and dashboard (Shiny)
+│   └── parser.py                  # PS2 file reading and parsing module
+├── .gitignore                     # Git ignore rules
+├── Makefile                       # Task automation (install, run, and clean)
+├── planeamento.md                 # Weekly planning and task allocation
+├── README.md                      # Main repository documentation
+└── requirements.txt               # Python project dependencies
 ```
 
 ---
 
-## 🛠 Tecnologias Utilizadas
+## Tech Stack
 
-| Tecnologia | Finalidade |
+| Technology | Purpose |
 | :--- | :--- |
-| **Python 3.10+** | Linguagem base do sistema |
-| **Shiny for Python** | Framework reativa para construção da interface web |
-| **Pandas** | Manipulação, limpeza e agregação de dados tabulares |
-| **Plotly Express** | Criação de gráficos analíticos e interativos |
-| **LaTeX / BibLaTeX** | Redação do relatório técnico e académico |
-| **Doxygen** | Geração automática de documentação a partir dos docstrings do código |
-| **Make** | Automação de tarefas de instalação e execução |
+| **Python 3.10+** | Core programming language |
+| **Shiny for Python** | Reactive web application framework |
+| **Pandas** | Tabular data manipulation, cleaning, and aggregation |
+| **Plotly Express** | Interactive analytical charts and visualizations |
+| **LaTeX / BibLaTeX** | Technical and academic report authoring |
+| **Doxygen** | Automated documentation generation from source docstrings |
+| **Make** | Build, installation, and execution workflow automation |
 
 ---
 
-## 💻 Instalação e Execução
+## Installation and Usage
 
-### Pré-requisitos
-* Python 3.10 ou superior instalado.
-* Gestor de pacotes `pip`.
+### Prerequisites
+- Python 3.10 or higher
+- `pip` package manager
 
-### 1. Clonar o Repositório
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/IPCALESI2526/d-43.git
+git clone [https://github.com/IPCALESI2526/d-43.git](https://github.com/IPCALESI2526/d-43.git)
 cd d-43
 ```
 
-### 2. Criar e Ativar Ambiente Virtual (Recomendado)
+### 2. Create and Activate a Virtual Environment (Recommended)
 ```bash
-# No Linux/macOS:
+# On Linux/macOS:
 python3 -m venv venv
 source venv/bin/activate
 
-# No Windows (PowerShell):
+# On Windows (PowerShell):
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-### 3. Instalar as Dependências
-Utilizando o `Makefile`:
+### 3. Install Dependencies
+Using the `Makefile`:
 ```bash
 make install
 ```
-Ou diretamente via `pip`:
+Or directly via `pip`:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Iniciar a Aplicação
-Utilizando o `Makefile`:
+### 4. Start the Application
+Using the `Makefile`:
 ```bash
 make run
 ```
-Ou diretamente com o comando do Shiny:
+Or directly with the Shiny CLI:
 ```bash
 shiny run src/app.py
 ```
 
-Aceda à aplicação no seu navegador através do endereço local indicado (geralmente `http://127.0.0.1:8000`).
+Open the application in your browser at the local address displayed in the terminal (typically `http://127.0.0.1:8000`).
 
 ---
 
-## 📄 Especificação do Formato PS2
+## PS2 Format Specification
 
-Os ficheiros na pasta `data/` representam transmissões de débitos diretos organizados por registos posicionais:
+The files in the `data/` directory represent direct debit transmissions structured as fixed-width positional records:
 
-| Tipo | Posição | Campo | Descrição |
+| Record Type | Position | Field | Description |
 | :---: | :---: | :--- | :--- |
-| **1 (Cabeçalho)** | `01-09` | Data Interna | Data de criação do ficheiro (`AAAAMMDD`) |
-| | `10-52` | Designação | Nome da entidade credora (ex: `IPCA Energy`) |
-| | `53-62` | NIF Entidade | Número de identificação fiscal da entidade |
-| | `63-75` | Valor Total | Montante acumulado do lote (em cêntimos) |
-| | `76-81` | Quantidade | Número total de movimentos no lote |
-| **2 (Movimento)** | `09-11` | ID Ordem | Sequencial do registo dentro do lote |
-| | `12-20` | NIF Cliente | Primeiros 9 caracteres do campo de identificação |
-| | `21-41` | NIB Cliente | Restantes 21 caracteres do campo de identificação |
-| | `42-55` | Valor | Montante a debitar (em cêntimos) |
-| | `56-82` | Descrição | Motivo do débito (ex: `Fatura Eletricidade 07/2025`) |
-| **9 (Rodapé)** | `02-15` | Valor Total | Totalizador de verificação do lote (em cêntimos) |
-| | `16-21` | Quantidade | Contagem final de registos para auditoria |
+| **1 (Header)** | `01-09` | Internal Date | File creation date (`YYYYMMDD`) |
+| | `10-52` | Creditor Name | Name of the billing entity (e.g., `IPCA Energy`) |
+| | `53-62` | Entity Tax ID (NIF) | Tax identification number of the creditor entity |
+| | `63-75` | Total Amount | Cumulative batch amount (in cents) |
+| | `76-81` | Record Count | Total number of transactions in the batch |
+| **2 (Transaction)** | `09-11` | Sequence ID | Sequential record number within the batch |
+| | `12-20` | Customer NIF | First 9 characters of the customer identifier field |
+| | `21-41` | Customer NIB | Remaining 21 characters of the customer identifier field |
+| | `42-55` | Amount | Debit amount (in cents) |
+| | `56-82` | Description | Debit reference/reason (e.g., `Fatura Eletricidade 07/2025`) |
+| **9 (Footer)** | `02-15` | Total Amount | Batch verification checksum total (in cents) |
+| | `16-21` | Record Count | Final transaction count for batch auditing |
 
-### Exemplo de Ficheiro (`DD_2025_07.ps2`)
+### Sample File (`DD_2025_07.ps2`)
 ```text
 120250726IPCA Energy                                50123456700000000028779000010
 2000000100100350651000025874125423568914200000000002136Fatura Eletricidade 07/2025
@@ -188,32 +188,32 @@ Os ficheiros na pasta `data/` representam transmissões de débitos diretos orga
 
 ---
 
-## 📸 Demonstração
+## Demo
 
 <div align="center">
-  <img src="./assets/img/DashboardDebitos.png" alt="Interface do Dashboard de Débitos Diretos" width="95%">
-  <p><em>Figura: Interface interativa desenvolvida com Shiny for Python com filtros de data, NIB e gráficos analíticos.</em></p>
+  <img src="./assets/img/DashboardDebitos.png" alt="Direct Debit Dashboard Interface" width="95%">
+  <p><em>Figure: Interactive Shiny for Python interface featuring date and NIB filters alongside analytical charts.</em></p>
 </div>
 
 ---
 
-## 👥 Equipa de Desenvolvimento (Grupo 43)
+## Development Team (Group 43)
 
-| Função no Planeamento | Número | Nome |
+| Planning Role | Student ID | Name |
 | :---: | :---: | :--- |
 | **A1** | `29330` | Edgar Brito |
 | **A2** | `29328` | Tiago Lima |
 | **A3** | `29333` | Rui Araújo |
 | **A4** | `29325` | Henrique Ribeiro |
 
-Consulte o documento [planeamento.md](./planeamento.md) para detalhes semanais de branches, commits e distribuição de tarefas de cada elemento.
+See [planeamento.md](./planeamento.md) for weekly branch schedules, commit history, and individual task breakdowns.
 
 ---
 
-## 🔗 Referências
+## References
 
-* [Documentação do Shiny for Python](https://shiny.posit.co/py/)
-* [Guia de Utilizador do Pandas](https://pandas.pydata.org/docs/)
-* [Documentação Interativa do Plotly](https://plotly.com/python/)
-* [Manual Oficial do Doxygen](https://www.doxygen.nl/manual/)
-* [Serviço gitignore.io](https://www.toptal.com/developers/gitignore)
+- [Shiny for Python Documentation](https://shiny.posit.co/py/)
+- [Pandas User Guide](https://pandas.pydata.org/docs/)
+- [Plotly Python Documentation](https://plotly.com/python/)
+- [Doxygen Official Manual](https://www.doxygen.nl/manual/)
+- [gitignore.io](https://www.toptal.com/developers/gitignore)
